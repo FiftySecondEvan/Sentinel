@@ -1,0 +1,317 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>Sentinel POC</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      :root{--bg:#ffffff;--muted:#6b7280;--card:#f8fafc;--accent:#0f172a;--danger:#ef4444;--ok:#10b981}
+      body{font-family: -apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial; margin:20px; background:var(--bg); color:var(--accent)}
+      .container{max-width:980px;margin:0 auto}
+      h1{margin:0 0 8px}
+      textarea{width:100%;height:140px;padding:10px;border:1px solid #e5e7eb;border-radius:6px;resize:vertical}
+      .controls{display:flex;gap:8px;margin-top:8px;align-items:center}
+      button{background:#0b69ff;color:#fff;padding:8px 12px;border-radius:6px;border:none;cursor:pointer}
+      button.secondary{background:#64748b}
+      .grid{display:grid;grid-template-columns:1fr 360px;gap:18px;margin-top:16px}
+      <!doctype html>
+      <html>
+        <head>
+          <meta charset="utf-8" />
+          <title>Sentinel POC</title>
+          <style>
+            :root{
+              --bg:#f6f8fb; --muted:#6b7280; --card:#ffffff; --accent:#0b1220; --primary:#0b69ff;
+              --danger:#ef4444; --ok:#10b981; --glass: rgba(255,255,255,0.6);
+            }
+            html,body{height:100%}
+            body{font-family:Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; margin:0; background:linear-gradient(180deg,#f3f6fb,#f6f8fb); color:var(--accent); -webkit-font-smoothing:antialiased}
+            .container{max-width:1080px;margin:28px auto;padding:18px}
+            h1{margin:0 0 6px;font-size:22px}
+            .subtitle{color:var(--muted);font-size:13px;margin-bottom:12px}
+            textarea{width:100%;height:140px;padding:14px;border:1px solid #e6eef7;border-radius:10px;resize:vertical;box-shadow:0 1px 0 rgba(12,20,30,0.02)}
+            .controls{display:flex;gap:10px;margin-top:12px;align-items:center}
+            button{background:var(--primary);color:#fff;padding:10px 14px;border-radius:10px;border:none;cursor:pointer;box-shadow:0 6px 18px rgba(11,105,255,0.12);transition:transform .12s ease, box-shadow .12s ease}
+            button:hover{transform:translateY(-2px);box-shadow:0 10px 30px rgba(11,105,255,0.14)}
+            button.secondary{background:#f3f6fb;color:var(--primary);box-shadow:none;border:1px solid #e6eef7}
+            .grid{display:grid;grid-template-columns:1fr 360px;gap:20px;margin-top:18px}
+            .card{background:var(--card);padding:16px;border-radius:14px;border:1px solid rgba(12,20,30,0.04);box-shadow:0 6px 20px rgba(13,24,40,0.03)}
+            .score-meter{display:flex;align-items:center;gap:16px}
+            .meter{width:220px;height:22px;background:#eef4ff;border-radius:14px;overflow:hidden;border:1px solid rgba(11,105,255,0.06)}
+            .meter-fill{height:100%;background:linear-gradient(90deg,var(--ok),#f59e0b);width:50%;transition:width .25s ease}
+            .score-num{font-weight:800;font-size:28px;color:var(--accent)}
+            .flags{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+            .flag{background:linear-gradient(180deg,#ffffff,#fbfdff);padding:12px;border-radius:10px;border:1px solid rgba(12,20,30,0.04);display:flex;flex-direction:column;gap:6px}
+            .flag-row{display:flex;align-items:center;gap:8px}
+            .flag .label{font-weight:700}
+            .badge{padding:4px 8px;border-radius:999px;font-size:12px}
+            .badge.low{background:#eef2ff;color:#0b69ff}
+            .badge.medium{background:#fff7ed;color:#f59e0b}
+            .badge.high{background:#fff1f2;color:#ef4444}
+            table{width:100%;border-collapse:collapse}
+            th,td{padding:8px 10px;border-bottom:1px solid #f1f5f9;text-align:left}
+            .muted{color:var(--muted);font-size:13px}
+            .spinner{display:inline-block;width:18px;height:18px;border-radius:50%;border:3px solid #e6eef7;border-top-color:var(--primary);animation:spin 1s linear infinite}
+            @keyframes spin{to{transform:rotate(360deg)}}
+            .raw{white-space:pre-wrap;background:#0b1220;color:#e6eef8;padding:12px;border-radius:8px;margin-top:8px}
+            .footer{margin-top:12px;font-size:13px;color:var(--muted)}
+            mark{background:#fffbdb;padding:0 2px}
+            .history-item{padding:8px;border-radius:8px;margin-top:6px;background:linear-gradient(180deg,#fbfdff,#ffffff);border:1px solid rgba(11,105,255,0.04);cursor:pointer}
+            .history-item:hover{box-shadow:0 6px 18px rgba(11,105,255,0.06)}
+            .trend-spark{display:inline-block;vertical-align:middle;margin-right:8px}
+            @media (max-width:880px){.grid{grid-template-columns:1fr;}.container{padding:12px;margin:12px}}
+          </style>
+        </head>
+        <body>
+          <div class="container mx-auto p-6">
+            <h1 class="text-2xl font-semibold">Sentinel POC</h1>
+            <div class="muted subtitle text-sm text-gray-500">Paste text or upload a filing. The system returns a Narrative Integrity score, flags, and numeric signals.</div>
+
+            <div class="card mt-4 p-6 bg-white rounded-xl shadow">
+              <textarea id="text" class="w-full h-36 p-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200">Enter some financial text or paste an SEC filing excerpt here.</textarea>
+              <div class="controls flex items-center gap-3 mt-4">
+                <button id="btn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg">Analyze</button>
+                <input id="file" type="file" class="ml-2" />
+                <button id="upload" class="secondary bg-gray-100 text-blue-600 px-3 py-2 rounded-lg border">Upload & Analyze</button>
+                <div id="status" class="muted ml-auto"></div>
+              </div>
+            </div>
+
+            <div class="grid">
+              <div>
+                <div id="result-area" class="card">
+                  <div class="score-meter">
+                    <div>
+                      <div class="muted">Narrative Integrity</div>
+                      <div class="flex items-center gap-4">
+                        <div class="meter relative overflow-hidden rounded-full w-56 h-5 bg-blue-50" aria-hidden>
+                          <div id="meter-fill" class="meter-fill absolute left-0 top-0 h-full bg-gradient-to-r from-green-500 to-yellow-400" style="width:50%"></div>
+                        </div>
+                        <div class="score-num text-3xl font-bold" id="score-num">—</div>
+                      </div>
+                    </div>
+                    <div style="margin-left:auto;text-align:right">
+                      <div class="muted">Trend</div>
+                      <div id="trend" class="muted text-sm text-gray-500">—</div>
+                    </div>
+                  </div>
+
+                  <h3 style="margin-top:12px">Top Flags</h3>
+                  <div id="flags" class="flags mt-2"><div class="muted">(no result)</div></div>
+
+                  <h3 style="margin-top:12px">Numeric Signals</h3>
+                  <div id="numeric" class="muted">(none)</div>
+
+                  <h3 style="margin-top:12px">Snippet</h3>
+                  <div id="snippet" class="muted">(no snippet)</div>
+
+                  <div style="margin-top:8px">
+                    <button id="toggle-raw" class="secondary bg-gray-100 text-blue-600 px-3 py-2 rounded-lg border">Show Raw JSON</button>
+                  </div>
+                  <div id="raw" class="raw" style="display:none"></div>
+                </div>
+              </div>
+
+              <div>
+                <div class="card p-4 bg-white rounded-xl shadow">
+                  <div class="muted">Quick actions</div>
+                  <div style="margin-top:8px">
+                    <button id="example1" class="bg-blue-50 text-blue-600 px-3 py-2 rounded">Load example MS excerpt</button>
+                    <div style="margin-top:12px">
+                      <strong class="muted">Recent analyses</strong>
+                      <div id="history" style="margin-top:8px" class="muted"></div>
+                      <div style="margin-top:8px"><button id="clear-history" class="secondary bg-gray-100 text-blue-600 px-3 py-2 rounded-lg border">Clear History</button></div>
+                    </div>
+                  </div>
+                  <div class="footer">Files uploaded are processed locally by the server.</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <script>
+            // Utilities
+            function escapeHtml(s){ return String(s||'').replace(/[&<>'"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;',"'":'&#39;','"':'&quot;'}[c])); }
+
+            function renderSparkline(trend){
+              if(!trend || !trend.length) return '';
+              const w=120,h=24,pad=2; let min=Math.min(...trend), max=Math.max(...trend);
+              if(min===max){ min = min-1; max = max+1 }
+              const points = trend.map((v,i)=>{
+                const x = pad + i*( (w-2*pad)/(trend.length-1 || 1));
+                const y = pad + (1 - (v-min)/(max-min))*(h-2*pad);
+                return `${x},${y}`;
+              }).join(' ');
+              return `<svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg"><polyline fill="none" stroke="#0b69ff" stroke-width="2" points="${points}"/></svg>`;
+            }
+
+            function saveToHistory(entry){
+              try{
+                const k='sentinel_history_v1';
+                let a=JSON.parse(localStorage.getItem(k)||'[]');
+                a.unshift(entry); if(a.length>10) a=a.slice(0,10);
+                localStorage.setItem(k, JSON.stringify(a));
+                renderHistory();
+              }catch(e){ }
+            }
+
+            function renderHistory(){
+              const k='sentinel_history_v1';
+              const container=document.getElementById('history'); container.innerHTML='';
+              let a=[]; try{ a=JSON.parse(localStorage.getItem(k)||'[]') }catch(e){}
+              if(!a.length){ container.innerHTML='<div class="muted">(none)</div>'; return }
+              a.forEach((it,idx)=>{
+                const d=document.createElement('div'); d.style.marginTop='6px';
+                d.innerHTML = `<a href="#" data-idx="${idx}">${escapeHtml(it.label||it.filename||('Result '+(idx+1)))}</a> <span class="muted">${it.date}</span>`;
+                d.querySelector('a').addEventListener('click', (ev)=>{ ev.preventDefault(); renderResult(it.payload); rawEl.style.display='block'; });
+                container.appendChild(d);
+              })
+            }
+
+            document.addEventListener('DOMContentLoaded', ()=>{
+              document.getElementById('clear-history').addEventListener('click', ()=>{ localStorage.removeItem('sentinel_history_v1'); renderHistory(); });
+            });
+
+            const statusEl = document.getElementById('status');
+            const meterFill = document.getElementById('meter-fill');
+            const scoreNum = document.getElementById('score-num');
+            const flagsEl = document.getElementById('flags');
+            const numericEl = document.getElementById('numeric');
+            const snippetEl = document.getElementById('snippet');
+            const rawEl = document.getElementById('raw');
+            const toggleRaw = document.getElementById('toggle-raw');
+
+            function setLoading(on, msg) {
+              statusEl.innerHTML = on ? (msg || '<span class="spinner"></span> processing') : '';
+            }
+
+            function renderResult(res) {
+              // score
+              const s = res.result?.score ?? res.score ?? null;
+              const score = (s === null || s === undefined) ? '—' : s;
+              scoreNum.textContent = score;
+              const pct = (typeof score === 'number') ? Math.max(0, Math.min(100, score)) : 50;
+              meterFill.style.width = pct + '%';
+              // trend
+              const trend = res.result?.trend ?? res.trend ?? [];
+              document.getElementById('trend').textContent = trend.join(' → ');
+              const spark = renderSparkline(trend);
+              if(spark) document.getElementById('trend').innerHTML = spark + ' ' + document.getElementById('trend').textContent;
+
+              // flags
+              const flags = res.result?.flags ?? res.flags ?? [];
+              flagsEl.innerHTML = '';
+              if (!flags.length) {
+                flagsEl.innerHTML = '<div class="muted">(no flags)</div>';
+              } else {
+                flags.forEach(f => {
+                  const div = document.createElement('div');
+                  div.className = 'flag p-3 rounded-lg border bg-white shadow-sm';
+                  // severity mapping by count
+                  const cnt = Number(f.count || 0);
+                  const sev = cnt >= 8 ? 'high' : (cnt >= 3 ? 'medium' : 'low');
+                  div.innerHTML = `<div class="flag-row"><div class="label">${escapeHtml(f.label)}</div><div class="badge ${sev}">${sev}</div><div style="margin-left:auto" class="muted">count: ${cnt}</div></div><div style="margin-top:6px">${escapeHtml(f.quote || '')}</div>`;
+                  flagsEl.appendChild(div);
+                });
+              }
+
+              // numeric
+              const nums = res.numeric_features ?? res.result?.numeric_features ?? {};
+              if (!Object.keys(nums).length) {
+                numericEl.innerHTML = '<div class="muted">(none)</div>';
+              } else {
+                const rows = ['<table><thead><tr><th>metric</th><th>prev</th><th>last</th><th>% change</th></tr></thead><tbody>'];
+                for (const k in nums) {
+                  const v = nums[k];
+                  rows.push(`<tr><td>${escapeHtml(k)}</td><td>${escapeHtml(String(v.prev ?? ''))}</td><td>${escapeHtml(String(v.last ?? ''))}</td><td>${v.pct_change==null? '': escapeHtml((v.pct_change.toFixed? v.pct_change.toFixed(1) : String(v.pct_change)) + '%')}</td></tr>`);
+                }
+                rows.push('</tbody></table>');
+                numericEl.innerHTML = rows.join('');
+              }
+
+              // snippet
+              const snip = res.snippet ?? res.result?.snippet ?? '';
+              snippetEl.textContent = snip ? snip.substring(0, 2000) : '(no snippet)';
+
+              // raw
+              rawEl.textContent = JSON.stringify(res, null, 2);
+
+              // Save to history
+              try{
+                const label = (res.filename || (res.result && res.result.filename) || (res.result && res.result.type) || 'analysis');
+                saveToHistory({label, date: (new Date()).toLocaleString(), filename: res.filename || (res.result && res.result.filename), payload: res});
+              }catch(e){}
+            }
+
+            async function analyzeText(text) {
+              setLoading(true, 'analyzing text...');
+              try {
+                const r = await fetch('/api/analyze', {method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({text})});
+                const j = await r.json();
+                renderResult({result: j});
+              } catch (e) {
+                alert('Error: ' + e.message);
+              } finally { setLoading(false); }
+            }
+
+            async function uploadFile(file) {
+              setLoading(true, 'uploading file...');
+              try {
+                const fd = new FormData(); fd.append('file', file);
+                const r = await fetch('/api/upload', {method:'POST', body: fd});
+                const j = await r.json();
+                renderResult(j);
+              } catch (e) { alert('Error: ' + e.message); }
+              finally { setLoading(false); }
+            }
+
+            document.getElementById('btn').addEventListener('click', () => {
+              const text = document.getElementById('text').value;
+              analyzeText(text);
+            });
+
+            document.getElementById('upload').addEventListener('click', () => {
+              const f = document.getElementById('file').files[0];
+              if (!f) { alert('Choose a file first'); return; }
+              uploadFile(f);
+            });
+
+            toggleRaw.addEventListener('click', () => {
+              rawEl.style.display = rawEl.style.display === 'none' ? 'block' : 'none';
+            });
+
+            document.getElementById('example1').addEventListener('click', () => {
+              document.getElementById('text').value = 'Example: management noted adjusted revenue and non-GAAP measures; uncertainty and one-time items discussed.';
+            });
+
+            // Drag-and-drop support
+            const dropArea = document.querySelector('.container');
+            dropArea.addEventListener('dragover', (e)=>{ e.preventDefault(); dropArea.style.outline='2px dashed #cbd5e1'; });
+            dropArea.addEventListener('dragleave', (e)=>{ dropArea.style.outline='none'; });
+            dropArea.addEventListener('drop', (e)=>{
+              e.preventDefault(); dropArea.style.outline='none';
+              const f = e.dataTransfer.files && e.dataTransfer.files[0]; if(f){ uploadFile(f); }
+            });
+
+            // Highlighting: click a flag to highlight its quote inside snippet
+            flagsEl.addEventListener('click', (ev)=>{
+              const target = ev.target.closest('.flag'); if(!target) return;
+              const quote = target.querySelector('div:nth-child(2)')?.textContent || '';
+              const s = document.getElementById('snippet');
+              const text = s.textContent || '';
+              if(!quote) return;
+              const idx = text.toLowerCase().indexOf(quote.toLowerCase().slice(0,120));
+              if(idx>=0){
+                // simple highlight by inserting <mark>
+                const before = escapeHtml(text.slice(0,idx));
+                const match = escapeHtml(text.slice(idx, idx + Math.min(quote.length, 400)));
+                const after = escapeHtml(text.slice(idx + Math.min(quote.length, 400)));
+                s.innerHTML = before + '<mark style="background: #fff59d; padding:0 2px">' + match + '</mark>' + after;
+              } else { alert('Quote not found in visible snippet. Toggle raw JSON to inspect full text.'); }
+            });
+
+            // render initial history
+            renderHistory();
+          </script>
+        </body>
+      </html>
