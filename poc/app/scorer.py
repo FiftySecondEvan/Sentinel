@@ -152,3 +152,28 @@ def analyze_text(text: str, history: Optional[List[float]] = None, numeric_featu
         "numeric_features": numeric_features or {},
         "nlp_extractions": nlp_extractions,
     }
+
+
+def analyze_text_llm(text: str, model: str = "gpt-4o-mini", max_snippets: int = 6) -> Dict[str, Any]:
+    """LLM-only scorer: call configured LLM provider to produce a JSON score/reasons/highlights.
+
+    This function is independent from the heuristic `analyze_text` above.
+    It uses the `poc.app.llm` provider to perform the call and returns the provider output merged into a standard wrapper.
+    """
+    if not text:
+        return {"score": None, "reasons": [], "highlights": [], "notes": "no text provided"}
+
+    try:
+        from .llm import get_default_provider
+
+        prov = get_default_provider()
+        out = prov.synthesize(text, model=model, max_snippets=max_snippets)
+        # normalize output: ensure score is int or None
+        if out.get("score") is not None:
+            try:
+                out["score"] = int(out["score"])
+            except Exception:
+                out["score"] = None
+        return out
+    except Exception as e:
+        return {"score": None, "reasons": [], "highlights": [], "notes": f"llm error: {e}"}

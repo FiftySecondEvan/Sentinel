@@ -21,6 +21,12 @@ source .venv/bin/activate
 pip install -r poc/requirements.txt
 ```
 
+Optional: set your OpenAI key in a local `.env` file (ignored by git):
+
+```bash
+echo 'OPENAI_API_KEY=sk-...' > .env
+```
+
 3. Run the app
 
 ```bash

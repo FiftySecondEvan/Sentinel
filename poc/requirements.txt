@@ -7,3 +7,5 @@ pdfminer.six
 pandas
 openpyxl
 xlrd
+openai
+python-dotenv
