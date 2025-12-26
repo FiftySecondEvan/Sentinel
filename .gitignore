@@ -1,8 +1,10 @@
 .poc_venv/
 __pycache__/
+**/__pycache__/
 *.pyc
 .DS_Store
 .env
 .poc_venv
 poc/server.log
+.cache/
 Sample SEC Filings/*.DS_Store
