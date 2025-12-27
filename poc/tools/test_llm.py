@@ -1,5 +1,9 @@
-from poc.app.scorer import analyze_text_llm
 import os
+
+from dotenv import load_dotenv
+from poc.app.scorer import analyze_text_llm
+
+load_dotenv()
 
 def run_sample():
     text = """
